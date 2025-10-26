@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Person {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  icon      String   @default("👤")
+  password  String?
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  dramas    Drama[]  @relation("DramaParticipants")
+}
+
+model Drama {
+  id           String   @id @default(cuid())
+  title        String
+  details      String   @default("")
+  severity     Int      @default(3)
+  isFinished   Boolean  @default(false)
+  finishedAt   DateTime?
+  createdAt    DateTime @default(now())
+  participants Person[] @relation("DramaParticipants")
+}

@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fefefe;
+  --foreground: #4a4a4a;
+}
+
+body {
+  color: var(--foreground);
+  background: linear-gradient(135deg, #ffffff 0%, #fdf5f0 50%, #fce7f3 100%);
+  background-attachment: fixed;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gradient-purple-pink {
+    background: linear-gradient(135deg, #f5d0fe 0%, #fecdd3 100%);
+  }
+
+  .gradient-blue-purple {
+    background: linear-gradient(135deg, #ddd6fe 0%, #fbcfe8 100%);
+  }
+
+  .gradient-green-blue {
+    background: linear-gradient(135deg, #d1fae5 0%, #dbeafe 100%);
+  }
+
+  .gradient-peach {
+    background: linear-gradient(135deg, #fed7aa 0%, #fecaca 100%);
+  }
+
+  .drama-card {
+    transition: all 0.3s ease;
+  }
+
+  .drama-card:hover {
+    transform: translateY(-4px);
+  }
+}
