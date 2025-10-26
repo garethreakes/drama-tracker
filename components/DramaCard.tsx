@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import DramaVoting from './DramaVoting'
 
 interface Person {
   id: string
@@ -212,6 +213,11 @@ export default function DramaCard({ drama }: DramaCardProps) {
             <span>{isExpanded ? 'Click to hide' : 'Click for more'}</span>
           </div>
         </button>
+
+        {/* Voting Section - shown when expanded */}
+        {isExpanded && (
+          <DramaVoting dramaId={drama.id} currentSeverity={drama.severity} />
+        )}
       </div>
     </div>
   )

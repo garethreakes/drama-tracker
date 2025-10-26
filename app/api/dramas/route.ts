@@ -8,6 +8,17 @@ export async function GET() {
         participants: {
           orderBy: { name: 'asc' },
         },
+        votes: {
+          include: {
+            person: {
+              select: {
+                id: true,
+                name: true,
+                icon: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     })
