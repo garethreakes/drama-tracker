@@ -93,11 +93,13 @@ export async function authenticateUser(name: string, password: string): Promise<
     (u) => u.name.toLowerCase() === name.toLowerCase()
   )
 
-  if (!user || !user.password) {
+  if (!user) {
     return null
   }
 
-  if (!verifyPassword(password, user.password)) {
+  // If user has no password set, allow any password (initial setup)
+  // If user has password set, verify it
+  if (user.password && !verifyPassword(password, user.password)) {
     return null
   }
 
