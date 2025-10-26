@@ -14,8 +14,8 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
 
-    if (!name.trim() || !password) {
-      setError('Name and password are required')
+    if (!name.trim()) {
+      setError('Name is required')
       return
     }
 
@@ -95,7 +95,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting || !name.trim() || !password}
+              disabled={isSubmitting || !name.trim()}
               className="w-full gradient-purple-pink text-white font-black py-3 px-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isSubmitting ? '⏳ Logging in...' : '🔐 Login'}
