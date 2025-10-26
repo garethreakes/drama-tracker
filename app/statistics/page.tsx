@@ -13,11 +13,23 @@ async function getDramas() {
   return dramas
 }
 
+async function getAllPeople() {
+  const people = await prisma.person.findMany({
+    orderBy: { name: 'asc' },
+  })
+  return people
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function StatisticsPage() {
   const dramas = await getDramas()
-  const stats = calculateStatistics(dramas)
+  const allPeople = await getAllPeople()
+  const stats = calculateStatistics(dramas, allPeople)
+
+  // Separate current month and previous months
+  const currentMonthWinner = stats.monthlyQueens.find(q => q.isCurrentMonth)
+  const previousMonthsWinners = stats.monthlyQueens.filter(q => !q.isCurrentMonth)
 
   return (
     <div className="space-y-8">
@@ -26,46 +38,109 @@ export default async function StatisticsPage() {
         <p className="text-purple-700 font-semibold">Overall drama analytics and trends</p>
       </div>
 
-      {/* Monthly Drama Queen Awards */}
-      {stats.monthlyQueens.length > 0 && (
+      {/* Current Month Leaderboard */}
+      {stats.currentMonthLeaderboard.length > 0 && (
         <section className="bg-white/80 backdrop-blur rounded-2xl shadow-xl border-4 border-purple-300 p-8">
-          <h2 className="text-3xl font-black text-purple-900 mb-6 text-center">
-            👑 Monthly Drama Queen Awards 👑
+          <h2 className="text-3xl font-black text-purple-900 mb-2 text-center">
+            👑 {currentMonthWinner?.monthLabel || 'Current Month'} Drama Queen Leaderboard 👑
           </h2>
-          <div className="space-y-4">
-            {stats.monthlyQueens.map((queen) => (
+          <p className="text-center text-purple-700 font-semibold mb-6">
+            Current standings for this month
+          </p>
+          <div className="space-y-3">
+            {stats.currentMonthLeaderboard.map((entry, index) => (
               <div
-                key={queen.month}
-                className={`p-6 rounded-xl shadow-lg transition-all ${
-                  queen.isCurrentMonth
-                    ? 'gradient-purple-pink border-4 border-yellow-400 transform scale-105'
-                    : 'bg-white border-2 border-purple-200'
+                key={entry.personId}
+                className={`p-4 rounded-xl shadow-lg transition-all ${
+                  index === 0 && entry.count > 0
+                    ? 'gradient-purple-pink border-4 border-yellow-400'
+                    : entry.count > 0
+                    ? 'bg-white border-2 border-purple-200'
+                    : 'bg-gray-50 border-2 border-gray-200 opacity-60'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="text-5xl">{queen.icon || '👤'}</div>
+                    <div className={`text-2xl font-black w-8 text-center ${
+                      index === 0 && entry.count > 0 ? 'text-white drop-shadow' : 'text-purple-600'
+                    }`}>
+                      {index === 0 && entry.count > 0 ? '👑' : `#${entry.rank}`}
+                    </div>
+                    <div className="text-4xl">{entry.icon || '👤'}</div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className={`text-2xl font-black ${queen.isCurrentMonth ? 'text-white drop-shadow' : 'text-purple-900'}`}>
-                          {queen.name}
+                        <h3 className={`text-xl font-black ${
+                          index === 0 && entry.count > 0 ? 'text-white drop-shadow' : 'text-purple-900'
+                        }`}>
+                          {entry.name}
                         </h3>
-                        {queen.isCurrentMonth && (
+                        {index === 0 && entry.count > 0 && (
                           <span className="px-3 py-1 text-xs font-black bg-yellow-400 text-purple-900 rounded-full shadow-md animate-pulse">
-                            🔥 CURRENT LEADER
+                            🔥 LEADING
                           </span>
                         )}
                       </div>
-                      <p className={`text-sm font-bold ${queen.isCurrentMonth ? 'text-white/90' : 'text-purple-700'}`}>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-3xl font-black ${
+                      index === 0 && entry.count > 0
+                        ? 'text-white drop-shadow'
+                        : entry.count > 0
+                        ? 'text-purple-600'
+                        : 'text-gray-400'
+                    }`}>
+                      {entry.count}
+                    </div>
+                    <div className={`text-xs font-bold ${
+                      index === 0 && entry.count > 0
+                        ? 'text-white/90'
+                        : entry.count > 0
+                        ? 'text-purple-600'
+                        : 'text-gray-400'
+                    }`}>
+                      {entry.count === 1 ? 'drama' : 'dramas'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Previous Months Winners History */}
+      {previousMonthsWinners.length > 0 && (
+        <section className="bg-white/80 backdrop-blur rounded-2xl shadow-xl border-4 border-purple-300 p-8">
+          <h2 className="text-3xl font-black text-purple-900 mb-6 text-center">
+            🏆 Drama Queen Hall of Fame 🏆
+          </h2>
+          <p className="text-center text-purple-700 font-semibold mb-6">
+            Previous months&apos; winners
+          </p>
+          <div className="space-y-3">
+            {previousMonthsWinners.map((queen) => (
+              <div
+                key={queen.month}
+                className="p-5 rounded-xl shadow-lg bg-white border-2 border-purple-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl">{queen.icon || '👤'}</div>
+                    <div>
+                      <h3 className="text-xl font-black text-purple-900">
+                        {queen.name}
+                      </h3>
+                      <p className="text-sm font-bold text-purple-700">
                         {queen.monthLabel}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`text-4xl font-black ${queen.isCurrentMonth ? 'text-white drop-shadow' : 'text-purple-600'}`}>
+                    <div className="text-3xl font-black text-purple-600">
                       {queen.count}
                     </div>
-                    <div className={`text-sm font-bold ${queen.isCurrentMonth ? 'text-white/90' : 'text-purple-600'}`}>
+                    <div className="text-xs font-bold text-purple-600">
                       {queen.count === 1 ? 'drama' : 'dramas'}
                     </div>
                   </div>

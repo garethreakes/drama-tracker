@@ -37,6 +37,14 @@ export interface MonthlyDramaQueen {
   isCurrentMonth: boolean
 }
 
+export interface MonthlyLeaderboardEntry {
+  personId: string
+  name: string
+  icon?: string
+  count: number
+  rank: number
+}
+
 /**
  * Groups dramas by week (Monday-started weeks) and counts them
  * @param dramas Array of dramas with createdAt dates
@@ -160,15 +168,85 @@ export function calculateMonthlyDramaQueens(dramas: Drama[]): MonthlyDramaQueen[
 }
 
 /**
+ * Calculates the full leaderboard for the current month
+ * @param dramas Array of dramas with participants
+ * @param allPeople Array of all people in the system
+ * @returns Array of all people sorted by drama count in current month (descending)
+ */
+export function calculateCurrentMonthLeaderboard(
+  dramas: Drama[],
+  allPeople: Person[]
+): MonthlyLeaderboardEntry[] {
+  const currentMonth = format(new Date(), 'yyyy-MM')
+
+  // Filter dramas to current month only
+  const currentMonthDramas = dramas.filter((drama) => {
+    const dramaMonth = format(new Date(drama.createdAt), 'yyyy-MM')
+    return dramaMonth === currentMonth
+  })
+
+  // Count involvement per person in current month
+  const involvementMap = new Map<string, { name: string; icon?: string; count: number }>()
+
+  currentMonthDramas.forEach((drama) => {
+    drama.participants.forEach((person) => {
+      const existing = involvementMap.get(person.id)
+      if (existing) {
+        existing.count++
+      } else {
+        involvementMap.set(person.id, {
+          name: person.name,
+          icon: person.icon,
+          count: 1,
+        })
+      }
+    })
+  })
+
+  // Create leaderboard including people with 0 dramas
+  const leaderboard: MonthlyLeaderboardEntry[] = allPeople.map((person) => {
+    const involvement = involvementMap.get(person.id)
+    return {
+      personId: person.id,
+      name: person.name,
+      icon: person.icon,
+      count: involvement?.count || 0,
+      rank: 0, // Will be assigned after sorting
+    }
+  })
+
+  // Sort by count descending, then by name ascending
+  leaderboard.sort((a, b) => {
+    if (b.count !== a.count) {
+      return b.count - a.count
+    }
+    return a.name.localeCompare(b.name)
+  })
+
+  // Assign ranks
+  let currentRank = 1
+  leaderboard.forEach((entry, index) => {
+    if (index > 0 && entry.count < leaderboard[index - 1].count) {
+      currentRank = index + 1
+    }
+    entry.rank = currentRank
+  })
+
+  return leaderboard
+}
+
+/**
  * Calculates overall statistics for dramas
  * @param dramas Array of dramas
+ * @param allPeople Array of all people (optional, for current month leaderboard)
  * @returns Object containing total drama count, per-person involvement, and weekly data
  */
-export function calculateStatistics(dramas: Drama[]) {
+export function calculateStatistics(dramas: Drama[], allPeople?: Person[]) {
   return {
     totalDramas: dramas.length,
     perPerson: calculatePersonInvolvement(dramas),
     perWeek: groupByWeek(dramas),
     monthlyQueens: calculateMonthlyDramaQueens(dramas),
+    currentMonthLeaderboard: allPeople ? calculateCurrentMonthLeaderboard(dramas, allPeople) : [],
   }
 }
