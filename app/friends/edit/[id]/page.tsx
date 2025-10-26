@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import EditFriendForm from '@/components/EditFriendForm'
+import { getSessionUser } from '@/lib/auth'
 
 async function getFriend(id: string) {
   const friend = await prisma.person.findUnique({
@@ -11,6 +12,7 @@ async function getFriend(id: string) {
 
 export default async function EditFriendPage({ params }: { params: { id: string } }) {
   const friend = await getFriend(params.id)
+  const currentUser = await getSessionUser()
 
   if (!friend) {
     notFound()
@@ -24,7 +26,7 @@ export default async function EditFriendPage({ params }: { params: { id: string 
       </div>
 
       <div className="bg-white/80 backdrop-blur rounded-2xl shadow-xl border-4 border-purple-300 p-8">
-        <EditFriendForm friend={friend} />
+        <EditFriendForm friend={friend} isAdmin={currentUser?.isAdmin || false} />
       </div>
     </div>
   )

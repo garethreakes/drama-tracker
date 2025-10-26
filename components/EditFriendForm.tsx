@@ -9,14 +9,16 @@ interface EditFriendFormProps {
     name: string
     icon: string
   }
+  isAdmin?: boolean
 }
 
 const FRIEND_ICONS = ['👤', '😀', '😎', '🤓', '😊', '🥳', '😇', '🤗', '🤩', '😺', '🐶', '🐱', '🦊', '🐻', '🐼', '🦁', '🐯', '🦄', '🌟', '⭐', '💫', '✨', '🎨', '🎭', '🎮', '⚽', '🎸', '🎤']
 
-export default function EditFriendForm({ friend }: EditFriendFormProps) {
+export default function EditFriendForm({ friend, isAdmin = false }: EditFriendFormProps) {
   const router = useRouter()
   const [name, setName] = useState(friend.name)
   const [selectedIcon, setSelectedIcon] = useState(friend.icon)
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -32,10 +34,20 @@ export default function EditFriendForm({ friend }: EditFriendFormProps) {
     setIsSubmitting(true)
 
     try {
+      // Build request body - include password only if provided
+      const body: { name: string; icon: string; password?: string } = {
+        name: name.trim(),
+        icon: selectedIcon,
+      }
+
+      if (password) {
+        body.password = password
+      }
+
       const response = await fetch(`/api/people/${friend.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), icon: selectedIcon }),
+        body: JSON.stringify(body),
       })
 
       const data = await response.json()
@@ -97,6 +109,26 @@ export default function EditFriendForm({ friend }: EditFriendFormProps) {
           ))}
         </div>
       </div>
+
+      {isAdmin && (
+        <div>
+          <label htmlFor="password" className="block text-sm font-bold text-purple-900 mb-1">
+            Set Password (Optional)
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border-2 border-purple-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-semibold"
+            placeholder="Leave blank to keep unchanged"
+            disabled={isSubmitting}
+          />
+          <p className="text-xs text-purple-600 mt-1 font-semibold">
+            Admin only: Set or change this person's password
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="text-sm text-red-700 bg-red-100 border-2 border-red-300 rounded-xl px-4 py-3 font-bold">
