@@ -9,7 +9,7 @@ export async function POST(
   try {
     // Get current user from cookie
     const cookieStore = await cookies()
-    const userIdCookie = cookieStore.get('userId')
+    const userIdCookie = cookieStore.get('drama_tracker_session')
 
     if (!userIdCookie) {
       return NextResponse.json(
@@ -154,7 +154,7 @@ export async function GET(
 
     // Get current user's vote
     const cookieStore = await cookies()
-    const userIdCookie = cookieStore.get('userId')
+    const userIdCookie = cookieStore.get('drama_tracker_session')
     const currentUserVote = userIdCookie
       ? votes.find(v => v.personId === userIdCookie.value)
       : null

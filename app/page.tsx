@@ -8,16 +8,33 @@ async function getDramas() {
       participants: {
         orderBy: { name: 'asc' },
       },
+      votes: true,
     },
     orderBy: { createdAt: 'desc' },
   })
 
-  // Serialize dates for client component
-  return dramas.map((drama) => ({
-    ...drama,
-    createdAt: drama.createdAt.toISOString(),
-    finishedAt: drama.finishedAt ? drama.finishedAt.toISOString() : null,
-  }))
+  // Serialize dates for client component and add voting info
+  return dramas.map((drama) => {
+    const totalVotes = drama.votes.length
+    const totalParticipants = drama.participants.length
+    const allVoted = totalVotes === totalParticipants && totalParticipants > 0
+
+    // Calculate average severity from votes if all have voted
+    const averageSeverity = totalVotes > 0
+      ? drama.votes.reduce((sum, vote) => sum + vote.severity, 0) / totalVotes
+      : drama.severity
+
+    return {
+      ...drama,
+      createdAt: drama.createdAt.toISOString(),
+      finishedAt: drama.finishedAt ? drama.finishedAt.toISOString() : null,
+      totalVotes,
+      totalParticipants,
+      allVoted,
+      averageSeverity: Math.round(averageSeverity),
+      votes: undefined, // Don't send all vote details to client
+    }
+  })
 }
 
 export const dynamic = 'force-dynamic'

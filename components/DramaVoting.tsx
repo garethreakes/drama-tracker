@@ -46,6 +46,7 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showVoteDetails, setShowVoteDetails] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isEditingVote, setIsEditingVote] = useState(false)
 
   const fetchVotingData = async () => {
     try {
@@ -92,6 +93,7 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
       }
 
       await fetchVotingData()
+      setIsEditingVote(false)
       router.refresh()
     } catch (error) {
       alert('Failed to submit vote. Please try again.')
@@ -124,6 +126,7 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
   }
 
   const hasVoted = votingData.currentUserVote !== null && votingData.currentUserVote !== undefined
+  const showVotingForm = !hasVoted || isEditingVote
   const allVoted = votingData.totalVotes === votingData.totalPeople
   const votingProgress = (votingData.totalVotes / votingData.totalPeople) * 100
 
@@ -159,31 +162,33 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
       </div>
 
       {/* Voting Interface */}
-      {!hasVoted ? (
-        <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
-          <div className="text-sm font-bold text-white mb-3">
+      {showVotingForm ? (
+        <div className="bg-white/20 rounded-xl p-6 backdrop-blur-sm overflow-visible">
+          <div className="text-sm font-bold text-white mb-4">
             🗳️ Cast Your Vote - How severe was this drama?
           </div>
 
-          <div className="flex gap-2 mb-3">
-            {[1, 2, 3, 4, 5].map((severity) => {
-              const info = getSeverityInfo(severity)
-              const isSelected = selectedSeverity === severity
-              return (
-                <button
-                  key={severity}
-                  onClick={() => setSelectedSeverity(severity)}
-                  className={`flex-1 p-3 rounded-lg font-bold transition-all transform hover:scale-105 ${
-                    isSelected
-                      ? `${info.color} text-white ring-4 ring-white shadow-lg scale-105`
-                      : 'bg-white/50 text-gray-700 hover:bg-white/70'
-                  }`}
-                >
-                  <div className="text-2xl">{info.emoji}</div>
-                  <div className="text-xs mt-1">{severity}</div>
-                </button>
-              )
-            })}
+          <div className="bg-white rounded-lg p-2 mb-4">
+            <div className="grid grid-cols-5 gap-1.5">
+              {[1, 2, 3, 4, 5].map((severity) => {
+                const info = getSeverityInfo(severity)
+                const isSelected = selectedSeverity === severity
+                return (
+                  <button
+                    key={severity}
+                    onClick={() => setSelectedSeverity(severity)}
+                    className={`p-2 rounded-lg font-bold transition-all flex flex-col items-center justify-center ${
+                      isSelected
+                        ? `${info.color} text-white shadow-xl border-4 border-white`
+                        : 'bg-white/50 text-gray-700 hover:bg-white/70 hover:scale-105'
+                    }`}
+                  >
+                    <div className="text-2xl">{info.emoji}</div>
+                    <div className="text-xs mt-1">{severity}</div>
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           <textarea
@@ -212,6 +217,7 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
               onClick={() => {
                 setSelectedSeverity(votingData.currentUserVote!.severity)
                 setComment(votingData.currentUserVote!.comment || '')
+                setIsEditingVote(true)
               }}
               className="text-xs bg-white/50 hover:bg-white/70 px-2 py-1 rounded font-bold text-gray-700"
             >

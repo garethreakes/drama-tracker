@@ -20,6 +20,10 @@ interface Drama {
   isFinished: boolean
   finishedAt?: Date | string | null
   participants: Person[]
+  totalVotes?: number
+  totalParticipants?: number
+  allVoted?: boolean
+  averageSeverity?: number
 }
 
 interface DramaCardProps {
@@ -94,7 +98,10 @@ export default function DramaCard({ drama }: DramaCardProps) {
     return severityLevels[severity - 1] || severityLevels[2]
   }
 
-  const severityInfo = getSeverityInfo(drama.severity)
+  // Use average severity if available, otherwise use drama severity
+  const displaySeverity = drama.averageSeverity || drama.severity
+  const severityInfo = getSeverityInfo(displaySeverity)
+  const isPending = !drama.allVoted && (drama.totalParticipants ?? 0) > 0
 
   const cardColors = [
     'from-pink-400 to-purple-500',
@@ -167,9 +174,15 @@ export default function DramaCard({ drama }: DramaCardProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-xl font-black text-white drop-shadow-lg">{drama.title}</h3>
-              <span className={`px-3 py-1 text-xs font-black ${severityInfo.bgColor} ${severityInfo.textColor} rounded-full shadow-lg ring-2 ring-white/50`}>
-                {severityInfo.emoji} {severityInfo.label.toUpperCase()}
-              </span>
+              {isPending ? (
+                <span className="px-3 py-1 text-xs font-black bg-gray-500 text-white rounded-full shadow-lg ring-2 ring-white/50">
+                  ⏳ PENDING
+                </span>
+              ) : (
+                <span className={`px-3 py-1 text-xs font-black ${severityInfo.bgColor} ${severityInfo.textColor} rounded-full shadow-lg ring-2 ring-white/50`}>
+                  {severityInfo.emoji} {severityInfo.label.toUpperCase()}
+                </span>
+              )}
               {drama.isFinished && (
                 <span className="px-2 py-1 text-xs font-black bg-white/90 text-gray-700 rounded-full shadow">
                   ✓ FINISHED
