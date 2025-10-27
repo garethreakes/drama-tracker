@@ -50,6 +50,12 @@ export default async function Home() {
           <h2 className="text-4xl font-black text-purple-900 drop-shadow-lg">✨ Drama Board ✨</h2>
           <div className="flex gap-3">
             <Link
+              href="/statistics"
+              className="gradient-yellow-orange text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            >
+              📊 Stats
+            </Link>
+            <Link
               href="/friends"
               className="gradient-green-blue text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
