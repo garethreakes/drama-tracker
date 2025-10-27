@@ -21,7 +21,7 @@ export default async function RootLayout({
       <body>
         <div className="min-h-screen">
           {sessionUser && (
-            <header className="gradient-purple-pink shadow-md border-b-4 border-pink-200">
+            <header className="gradient-purple-pink shadow-md border-t-8 border-b-4 border-pink-200">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <h1 className="text-4xl font-black text-pink-800 drop-shadow-sm">
