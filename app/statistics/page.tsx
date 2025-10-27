@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { calculateStatistics } from '@/lib/analytics'
 import PerPersonBar from '@/components/Charts/PerPersonBar'
 import PerWeekLine from '@/components/Charts/PerWeekLine'
+import Link from 'next/link'
 
 async function getDramas() {
   const dramas = await prisma.drama.findMany({
@@ -34,7 +35,15 @@ export default async function StatisticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-4xl font-black text-purple-900 mb-2">📊 Statistics 📊</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-4xl font-black text-purple-900">📊 Statistics 📊</h1>
+          <Link
+            href="/"
+            className="gradient-purple-pink text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+          >
+            🏠 Back to Home
+          </Link>
+        </div>
         <p className="text-purple-700 font-semibold">Overall drama analytics and trends</p>
       </div>
 
