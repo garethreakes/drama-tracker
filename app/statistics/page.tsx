@@ -83,6 +83,11 @@ export default async function StatisticsPage() {
                         }`}>
                           {entry.name}
                         </h3>
+                        {entry.isAdmin && (
+                          <span className="px-2 py-0.5 text-xs font-black bg-yellow-400 text-purple-900 rounded-full shadow-md">
+                            👑 ADMIN
+                          </span>
+                        )}
                         {index === 0 && entry.count > 0 && (
                           <span className="px-3 py-1 text-xs font-black bg-yellow-400 text-purple-900 rounded-full shadow-md animate-pulse">
                             🔥 LEADING

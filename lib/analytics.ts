@@ -13,6 +13,7 @@ export interface Person {
   name: string
   icon?: string
   createdAt: Date
+  isAdmin?: boolean
 }
 
 export interface WeeklyData {
@@ -43,6 +44,7 @@ export interface MonthlyLeaderboardEntry {
   icon?: string
   count: number
   rank: number
+  isAdmin?: boolean
 }
 
 /**
@@ -212,6 +214,7 @@ export function calculateCurrentMonthLeaderboard(
       icon: person.icon,
       count: involvement?.count || 0,
       rank: 0, // Will be assigned after sorting
+      isAdmin: person.isAdmin,
     }
   })
 
