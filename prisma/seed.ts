@@ -20,6 +20,13 @@ async function main() {
 
   console.log(`Created ${friends.length} friends`)
 
+  // Set Lowri as admin
+  await prisma.person.update({
+    where: { name: 'Lowri' },
+    data: { isAdmin: true },
+  })
+  console.log('✅ Lowri set as admin')
+
   // Create some sample dramas for testing
   const drama1 = await prisma.drama.create({
     data: {

@@ -12,6 +12,7 @@
     "prisma:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "set-admin": "tsx scripts/set-lowri-admin.ts",
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:watch": "vitest",
