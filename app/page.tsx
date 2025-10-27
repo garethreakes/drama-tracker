@@ -51,7 +51,7 @@ export default async function Home() {
           <div className="flex gap-3">
             <Link
               href="/statistics"
-              className="gradient-peach text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              className="gradient-blue-purple text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
               📊 Stats
             </Link>
