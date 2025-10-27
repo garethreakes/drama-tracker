@@ -125,7 +125,7 @@ export default function EditFriendForm({ friend, isAdmin = false }: EditFriendFo
             disabled={isSubmitting}
           />
           <p className="text-xs text-purple-600 mt-1 font-semibold">
-            Admin only: Set or change this person's password
+            Admin only: Set or change this person&apos;s password
           </p>
         </div>
       )}

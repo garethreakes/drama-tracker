@@ -68,6 +68,7 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
 
   useEffect(() => {
     fetchVotingData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dramaId])
 
   const handleVoteSubmit = async () => {
@@ -226,7 +227,7 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
           </div>
           {votingData.currentUserVote!.comment && (
             <div className="text-xs text-white/90 italic mt-1">
-              "{votingData.currentUserVote!.comment}"
+              &ldquo;{votingData.currentUserVote!.comment}&rdquo;
             </div>
           )}
         </div>
