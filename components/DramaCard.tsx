@@ -105,11 +105,11 @@ export default function DramaCard({ drama }: DramaCardProps) {
 
   const cardColors = [
     'from-pink-400 to-purple-500',
-    'from-blue-400 to-cyan-500',
-    'from-green-400 to-teal-500',
+    'from-rose-400 to-pink-500',
+    'from-pink-300 to-rose-400',
     'from-rose-300 to-pink-400',
     'from-purple-400 to-pink-500',
-    'from-indigo-400 to-purple-500',
+    'from-pink-500 to-rose-500',
   ]
 
   const colorIndex = drama.id.charCodeAt(0) % cardColors.length
