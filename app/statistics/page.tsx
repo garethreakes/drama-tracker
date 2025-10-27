@@ -35,11 +35,11 @@ export default async function StatisticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
           <h1 className="text-4xl font-black text-purple-900">📊 Statistics 📊</h1>
           <Link
             href="/"
-            className="gradient-purple-pink text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            className="gradient-purple-pink text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all whitespace-nowrap"
           >
             🏠 Back to Home
           </Link>
