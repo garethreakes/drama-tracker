@@ -90,14 +90,17 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
       })
 
       if (!response.ok) {
-        throw new Error('Failed to submit vote')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to submit vote')
       }
 
       await fetchVotingData()
       setIsEditingVote(false)
       router.refresh()
     } catch (error) {
-      alert('Failed to submit vote. Please try again.')
+      const message = error instanceof Error ? error.message : 'Failed to submit vote. Please try again.'
+      alert(message)
+      console.error('Vote submission error:', error)
     } finally {
       setIsSubmitting(false)
     }
