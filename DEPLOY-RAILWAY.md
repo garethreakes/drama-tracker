@@ -1,6 +1,6 @@
-# Deploy to Railway
+# Deploy to Railway with PostgreSQL
 
-Complete guide to deploying Drama Tracker on Railway.app
+Complete guide to deploying Drama Tracker on Railway.app with managed PostgreSQL database.
 
 ## Prerequisites
 
@@ -23,28 +23,25 @@ Complete guide to deploying Drama Tracker on Railway.app
 3. Choose `drama-tracker` from your repositories
 4. Railway will automatically detect it's a Next.js app
 
-### 3. Configure Environment Variables
+### 3. Add PostgreSQL Database
 
-Click on your service → "Variables" tab → Add these:
+Railway provides managed PostgreSQL:
 
-```env
-NODE_ENV=production
-DATABASE_URL=file:/data/prod.db
-```
+1. In your project, click "New"
+2. Select "Database"
+3. Choose "Add PostgreSQL"
+4. Railway will create a PostgreSQL instance
 
-**Important:** The `/data` path will be where we mount the persistent volume.
+### 4. Link Database to Service
 
-### 4. Add Persistent Volume (CRITICAL!)
+Railway automatically sets the `DATABASE_URL` environment variable:
 
-Your SQLite database needs persistent storage:
+1. Click on your web service
+2. Go to "Variables" tab
+3. Verify `DATABASE_URL` is set (Railway does this automatically)
+4. Add `NODE_ENV=production`
 
-1. In your service, click "Settings"
-2. Scroll to "Volumes"
-3. Click "Add Volume"
-4. Set mount path: `/data`
-5. Click "Add"
-
-This ensures your database survives redeployments.
+**Note:** Railway automatically connects your service to the PostgreSQL database!
 
 ### 5. Configure Build Settings (Auto-detected)
 
@@ -54,17 +51,18 @@ Railway should auto-detect these, but verify in Settings:
 - **Start Command:** `npm start`
 - **Install Command:** `npm install`
 
-### 6. Add Custom Start Command
+### 6. First Deploy - Seed the Database
 
-We need to initialize the database on first deploy:
+After the first deployment succeeds:
 
-1. Go to Settings → "Deploy"
-2. Set **Start Command** to:
+1. Go to your service
+2. Click on the latest deployment
+3. You can run the seed command via Railway CLI (optional):
    ```bash
-   npm run setup && npm start
+   railway run npm run db:seed
    ```
 
-**Note:** This runs setup (creates DB + seeds) before starting. After first deploy, you can change it back to just `npm start`.
+Or just log in and add data through the UI!
 
 ### 7. Deploy!
 
@@ -97,35 +95,56 @@ Watch the logs in the "Deployments" tab.
 | Variable | Value | Purpose |
 |----------|-------|---------|
 | `NODE_ENV` | `production` | Tells Next.js to run in production mode |
-| `DATABASE_URL` | `file:/data/prod.db` | Points to persistent volume for SQLite |
+| `DATABASE_URL` | `postgresql://...` | Auto-set by Railway, points to PostgreSQL database |
 
 ## Database Management on Railway
 
 ### View Database
 
-You can't easily browse SQLite on Railway, but you can:
+Railway provides multiple ways to access your PostgreSQL database:
 
-1. Download the database:
-   - Railway dashboard → your service → "Data" tab
-   - Download the volume
+1. **Railway Dashboard:**
+   - Click on PostgreSQL service
+   - Go to "Data" tab
+   - Browse tables directly
 
-2. Or add Prisma Studio to your deployment (optional)
+2. **psql CLI:**
+   ```bash
+   railway connect postgres
+   ```
+
+3. **Prisma Studio (local):**
+   ```bash
+   # Copy DATABASE_URL from Railway
+   DATABASE_URL="postgresql://..." npx prisma studio
+   ```
 
 ### Backup Database
 
-**Manual backup:**
-1. Go to your service → "Data"
-2. Download the volume
-3. Save locally
+Railway automatically backs up your PostgreSQL database!
 
-**Automated backup:**
-Consider using Railway's [backup addon](https://railway.app/addons) or set up a cron job.
+**Manual backup:**
+```bash
+# Using Railway CLI
+railway connect postgres
+pg_dump > backup-$(date +%Y%m%d).sql
+```
 
 ### Reset Database
 
-1. Delete the volume in Railway
-2. Create a new volume at `/data`
-3. Redeploy (will run setup again)
+**Warning:** This will delete all data!
+
+```bash
+railway connect postgres
+# Then in psql:
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+\q
+
+# Run migrations again
+railway run npx prisma migrate deploy
+railway run npm run db:seed
+```
 
 ## Updating Your App
 
@@ -154,13 +173,15 @@ git push
 
 ### Database errors
 
-**"Database not found":**
-- Check that volume is mounted at `/data`
-- Verify `DATABASE_URL=file:/data/prod.db`
+**"Can't connect to database":**
+- Verify PostgreSQL service is running in Railway
+- Check that services are linked (DATABASE_URL should be auto-set)
+- Look for migration errors in deployment logs
 
-**"Database is locked":**
-- Multiple instances might be running
-- Check Settings → Scale → Should be 1 replica
+**"Table does not exist":**
+- Migrations may not have run
+- Check deployment logs for `prisma migrate deploy` output
+- Manually run: `railway run npx prisma migrate deploy`
 
 ### App starts but crashes
 
@@ -289,8 +310,17 @@ After successful deployment:
 
 If you ever want to migrate:
 
-1. Download database from Railway volume
-2. Export as SQL
-3. Import to new platform (follow DEPLOYMENT.md)
+1. Export database:
+   ```bash
+   railway connect postgres
+   pg_dump > export.sql
+   ```
 
-Your code is platform-agnostic and works anywhere!
+2. Import to new PostgreSQL instance:
+   ```bash
+   psql -h newhost -U user -d database < export.sql
+   ```
+
+3. Update `DATABASE_URL` in your new environment
+
+Your code is platform-agnostic and works with any PostgreSQL database!

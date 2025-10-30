@@ -4,13 +4,16 @@ Welcome to Drama Tracker! This guide will get you up and running in under 5 minu
 
 ## Prerequisites
 
-Make sure you have Node.js (18.x or 20.x) installed:
+Make sure you have Node.js (18.x or 20.x) and PostgreSQL installed:
 
 ```bash
 node --version
+psql --version
 ```
 
-If not installed, download from [nodejs.org](https://nodejs.org/)
+If not installed:
+- Node.js: Download from [nodejs.org](https://nodejs.org/)
+- PostgreSQL: Download from [postgresql.org](https://postgresql.org/) or use Homebrew on macOS: `brew install postgresql@14`
 
 ## Setup Steps
 
@@ -20,7 +23,21 @@ If not installed, download from [nodejs.org](https://nodejs.org/)
 cd drama-tracker
 ```
 
-### 2. Install all dependencies
+### 2. Create PostgreSQL database
+
+```bash
+createdb drama_tracker_dev
+```
+
+### 3. Copy environment file
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` if your PostgreSQL credentials differ from the defaults.
+
+### 4. Install all dependencies
 
 ```bash
 npm install
@@ -28,25 +45,25 @@ npm install
 
 This will install Next.js, React, Prisma, testing libraries, and all other dependencies.
 
-### 3. Setup the database
+### 5. Setup the database
 
 ```bash
-npm run prisma:generate && npm run db:push && npm run db:seed
+npm run setup
 ```
 
 This single command will:
 - Generate the Prisma client
-- Create the SQLite database
+- Run database migrations
 - Seed it with 6 friends (Lowri, Emma, Melissa, Grace, Ella, Sofia)
 - Add 4 sample dramas for testing
 
-### 4. Start the development server
+### 6. Start the development server
 
 ```bash
 npm run dev
 ```
 
-### 5. Open your browser
+### 7. Open your browser
 
 Navigate to [http://localhost:3000](http://localhost:3000)
 
@@ -88,11 +105,12 @@ If port 3000 is busy, you can specify a different port:
 PORT=3001 npm run dev
 ```
 
-### Database locked error
+### Can't connect to database
 
-If you see database locked errors, make sure:
-- No other instances of the app are running
-- Delete `prisma/dev.db` and run `npm run db:push && npm run db:seed` again
+If you see connection errors:
+- Make sure PostgreSQL is running: `brew services start postgresql@14` (macOS) or `sudo systemctl start postgresql` (Linux)
+- Verify database exists: `psql -l | grep drama_tracker_dev`
+- Check your `.env` file has the correct `DATABASE_URL`
 
 ### Tests failing
 

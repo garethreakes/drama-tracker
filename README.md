@@ -16,7 +16,7 @@ A fun, colorful web app for tracking drama between friends with severity ratings
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
-- **Database**: SQLite with Prisma ORM
+- **Database**: PostgreSQL with Prisma ORM
 - **Charts**: Recharts
 - **Authentication**: Cookie-based sessions
 - **Testing**: Vitest + Testing Library, Playwright
@@ -25,39 +25,59 @@ A fun, colorful web app for tracking drama between friends with severity ratings
 
 - Node.js 18+ or 20+
 - npm (comes with Node.js)
+- PostgreSQL 14+ (locally or via Railway)
 - Works on Linux, macOS, and Windows
-- For production deployment on Linux, see [DEPLOYMENT.md](DEPLOYMENT.md)
+- For production deployment, see [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md)
 
 ## Quick Start (Local Development)
 
-1. **Clone and Install**
+1. **Install PostgreSQL**
+   ```bash
+   # macOS with Homebrew
+   brew install postgresql@14
+   brew services start postgresql@14
+
+   # Ubuntu/Debian
+   sudo apt-get install postgresql postgresql-contrib
+   sudo systemctl start postgresql
+
+   # Windows: Download installer from postgresql.org
+   ```
+
+2. **Create Database**
+   ```bash
+   createdb drama_tracker_dev
+   ```
+
+3. **Clone and Install**
    ```bash
    git clone <your-repo-url>
    cd drama-tracker
    npm install
    ```
 
-2. **Set Up Environment**
+4. **Set Up Environment**
    ```bash
    cp .env.example .env
+   # Edit .env if your PostgreSQL credentials differ
    ```
 
-3. **Initialize Database**
+5. **Initialize Database**
    ```bash
    npm run setup
    ```
    This will:
    - Generate Prisma client
-   - Create database
+   - Run database migrations
    - Add default friends (Lowri, Emma, Melissa, Grace, Ella, Sofia)
    - Set Lowri as admin
 
-4. **Start Development Server**
+6. **Start Development Server**
    ```bash
    npm run dev
    ```
 
-5. **Open Browser**
+7. **Open Browser**
    - Navigate to http://localhost:3000
    - Login with: Lowri (set password via "Manage Friends" when first prompted)
 
@@ -82,7 +102,7 @@ A fun, colorful web app for tracking drama between friends with severity ratings
 
    Update `.env` for production:
    ```env
-   DATABASE_URL="file:./prod.db"
+   DATABASE_URL="postgresql://user:password@localhost:5432/drama_tracker"
    NODE_ENV="production"
    ```
 
@@ -168,9 +188,9 @@ sudo certbot --nginx -d your-domain.com
 - `npm run lint` - Run ESLint
 
 ### Database
-- `npm run setup` - Complete database setup (generate + push + seed)
+- `npm run setup` - Complete database setup (generate + migrate + seed)
 - `npm run prisma:generate` - Generate Prisma client
-- `npm run db:push` - Push schema to database
+- `npm run prisma:migrate` - Create and apply new migration
 - `npm run db:seed` - Seed database with initial friends
 - `npm run prisma:studio` - Open Prisma Studio (database GUI)
 
@@ -187,7 +207,7 @@ Create a `.env` file with these variables:
 
 ```env
 # Database
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/drama_tracker_dev"
 
 # Node Environment
 NODE_ENV="development"
@@ -195,7 +215,7 @@ NODE_ENV="development"
 
 For production, change to:
 ```env
-DATABASE_URL="file:./prod.db"
+DATABASE_URL="postgresql://user:password@host:5432/drama_tracker"
 NODE_ENV="production"
 ```
 
@@ -203,13 +223,20 @@ NODE_ENV="production"
 
 ### Backup Database
 ```bash
-# Database is a single SQLite file
-cp prisma/dev.db prisma/backup-$(date +%Y%m%d).db
+# Create PostgreSQL backup
+pg_dump drama_tracker_dev > backup-$(date +%Y%m%d).sql
+```
+
+### Restore Database
+```bash
+# Restore from backup
+psql drama_tracker_dev < backup-20251030.sql
 ```
 
 ### Reset Database
 ```bash
-rm prisma/dev.db
+dropdb drama_tracker_dev
+createdb drama_tracker_dev
 npm run setup
 ```
 
@@ -309,7 +336,7 @@ drama-tracker/
 ├── prisma/                       # Database
 │   ├── schema.prisma             # Database schema
 │   ├── seed.ts                   # Seed script
-│   └── dev.db                    # SQLite database (dev)
+│   └── migrations/               # Database migrations
 ├── middleware.ts                 # Route protection
 ├── .env                          # Environment variables
 └── .env.example                  # Example env file
@@ -333,19 +360,22 @@ sudo kill -9 <PID>
 ### Prisma errors after schema changes
 ```bash
 npm run prisma:generate
-npm run db:push
+npm run prisma:migrate
 # Restart the server
 ```
 
-### Database is locked
+### Can't connect to PostgreSQL
 ```bash
-# Stop all running instances
-pkill -f "next dev"
-# Or kill PM2 instance
-pm2 stop drama-tracker
+# Check if PostgreSQL is running
+# macOS
+brew services list
 
-# Restart the server
-npm run dev  # or pm2 restart drama-tracker
+# Linux
+sudo systemctl status postgresql
+
+# Start PostgreSQL if needed
+brew services start postgresql@14  # macOS
+sudo systemctl start postgresql    # Linux
 ```
 
 ### Can't log in / Forgot password
@@ -385,9 +415,10 @@ npm run build
 
 ## Performance
 
-- SQLite is suitable for small to medium deployments (<100 concurrent users)
-- For larger scale, consider migrating to PostgreSQL (update DATABASE_URL and Prisma provider)
+- PostgreSQL is suitable for production deployments
+- Railway provides managed PostgreSQL with automatic backups
 - Enable gzip compression in Nginx for better performance
+- Use connection pooling for high-traffic deployments
 
 ## License
 

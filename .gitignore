@@ -49,12 +49,11 @@ yarn-error.log*
 next-env.d.ts
 
 # database
+# Old SQLite database files (legacy - now using PostgreSQL)
 prisma/*.db
 prisma/*.db-journal
 *.db
 *.db-journal
-
-# backups
 *.db-backup
 backup-*.db
 

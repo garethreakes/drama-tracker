@@ -1,29 +1,34 @@
 import { PrismaClient } from '@prisma/client'
 import { execSync } from 'child_process'
-import path from 'path'
-import fs from 'fs'
 
 async function globalSetup() {
-  const testDbPath = path.join(__dirname, '..', 'prisma', 'test.db')
+  // Set DATABASE_URL for test - uses a separate test database
+  const testDatabaseUrl = 'postgresql://postgres:postgres@localhost:5432/drama_tracker_test'
+  process.env.DATABASE_URL = testDatabaseUrl
 
-  // Remove existing test database
-  if (fs.existsSync(testDbPath)) {
-    fs.unlinkSync(testDbPath)
+  // Drop and recreate test database
+  try {
+    execSync('dropdb drama_tracker_test --if-exists', {
+      env: { ...process.env, PGUSER: 'postgres', PGPASSWORD: 'postgres' },
+    })
+  } catch (e) {
+    // Ignore errors if database doesn't exist
   }
 
-  // Set DATABASE_URL for test
-  process.env.DATABASE_URL = 'file:./test.db'
+  execSync('createdb drama_tracker_test', {
+    env: { ...process.env, PGUSER: 'postgres', PGPASSWORD: 'postgres' },
+  })
 
   // Run migrations
-  execSync('npx prisma db push', {
-    env: { ...process.env, DATABASE_URL: 'file:./test.db' },
+  execSync('npx prisma migrate deploy', {
+    env: { ...process.env, DATABASE_URL: testDatabaseUrl },
   })
 
   // Seed test database
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: 'file:./test.db',
+        url: testDatabaseUrl,
       },
     },
   })
