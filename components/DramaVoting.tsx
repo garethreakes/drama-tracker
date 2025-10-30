@@ -91,6 +91,14 @@ export default function DramaVoting({ dramaId, currentSeverity }: DramaVotingPro
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
+
+        // If session is invalid, redirect to login
+        if (response.status === 401 && errorData.error?.includes('session')) {
+          alert(errorData.error)
+          router.push('/login')
+          return
+        }
+
         throw new Error(errorData.error || 'Failed to submit vote')
       }
 

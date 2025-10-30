@@ -21,6 +21,18 @@ export async function POST(
     const userId = userIdCookie.value
     const dramaId = params.id
 
+    // Verify user exists in database
+    const user = await prisma.person.findUnique({
+      where: { id: userId },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Your session is invalid. Please log in again.' },
+        { status: 401 }
+      )
+    }
+
     // Verify drama exists
     const drama = await prisma.drama.findUnique({
       where: { id: dramaId },
