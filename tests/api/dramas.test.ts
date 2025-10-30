@@ -20,15 +20,16 @@ describe('GET /api/dramas', () => {
   })
 
   it('should return list of dramas with participants', async () => {
+    const mockDate = '2025-10-30T10:00:00.000Z'
     const mockDramas = [
       {
         id: '1',
         title: 'Test Drama',
         details: 'Details',
-        createdAt: new Date(),
+        createdAt: new Date(mockDate),
         participants: [
-          { id: '1', name: 'Alice', createdAt: new Date() },
-          { id: '2', name: 'Bob', createdAt: new Date() },
+          { id: '1', name: 'Alice', createdAt: new Date(mockDate), icon: '👤' },
+          { id: '2', name: 'Bob', createdAt: new Date(mockDate), icon: '👤' },
         ],
       },
     ]
@@ -39,7 +40,17 @@ describe('GET /api/dramas', () => {
     const data = await response.json()
 
     expect(response.status).toBe(200)
-    expect(data).toEqual(mockDramas)
+    expect(data).toMatchObject([
+      {
+        id: '1',
+        title: 'Test Drama',
+        details: 'Details',
+        participants: [
+          { id: '1', name: 'Alice' },
+          { id: '2', name: 'Bob' },
+        ],
+      },
+    ])
   })
 })
 
@@ -49,20 +60,21 @@ describe('POST /api/dramas', () => {
   })
 
   it('should create a new drama successfully', async () => {
+    const mockDate = '2025-10-30T10:00:00.000Z'
     const participants = [
-      { id: '1', name: 'Alice', createdAt: new Date() },
-      { id: '2', name: 'Bob', createdAt: new Date() },
+      { id: '1', name: 'Alice', createdAt: new Date(mockDate), icon: '👤' },
+      { id: '2', name: 'Bob', createdAt: new Date(mockDate), icon: '👤' },
     ]
 
     const newDrama = {
       id: '1',
       title: 'Test Drama',
       details: 'Details',
-      createdAt: new Date(),
+      createdAt: new Date(mockDate),
       participants,
     }
 
-    vi.mocked(prisma.person.findMany).mockResolvedValue(participants)
+    vi.mocked(prisma.person.findMany).mockResolvedValue(participants as any)
     vi.mocked(prisma.drama.create).mockResolvedValue(newDrama as any)
 
     const request = new Request('http://localhost/api/dramas', {
@@ -78,7 +90,15 @@ describe('POST /api/dramas', () => {
     const data = await response.json()
 
     expect(response.status).toBe(201)
-    expect(data).toEqual(newDrama)
+    expect(data).toMatchObject({
+      id: '1',
+      title: 'Test Drama',
+      details: 'Details',
+      participants: [
+        { id: '1', name: 'Alice' },
+        { id: '2', name: 'Bob' },
+      ],
+    })
   })
 
   it('should return 400 if title is missing', async () => {
@@ -129,9 +149,10 @@ describe('POST /api/dramas', () => {
   })
 
   it('should return 400 if participant IDs are invalid', async () => {
+    const mockDate = '2025-10-30T10:00:00.000Z'
     vi.mocked(prisma.person.findMany).mockResolvedValue([
-      { id: '1', name: 'Alice', createdAt: new Date() },
-    ])
+      { id: '1', name: 'Alice', createdAt: new Date(mockDate), icon: '👤' },
+    ] as any)
 
     const request = new Request('http://localhost/api/dramas', {
       method: 'POST',

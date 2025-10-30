@@ -29,14 +29,40 @@ async function globalSetup() {
   })
 
   try {
-    // Create initial friends
+    // Create initial friends with passwords for testing
+    const bcrypt = require('bcrypt')
     const friendNames = ['Lowri', 'Emma', 'Melissa', 'Grace', 'Ella', 'Sofia']
+    const testPassword = await bcrypt.hash('test123', 10)
 
     for (const name of friendNames) {
       await prisma.person.upsert({
         where: { name },
-        update: {},
-        create: { name },
+        update: { passwordHash: testPassword },
+        create: { name, passwordHash: testPassword },
+      })
+    }
+
+    // Create a test drama for voting tests
+    const lowri = await prisma.person.findUnique({ where: { name: 'Lowri' } })
+    const emma = await prisma.person.findUnique({ where: { name: 'Emma' } })
+    const melissa = await prisma.person.findUnique({ where: { name: 'Melissa' } })
+
+    if (lowri && emma && melissa) {
+      await prisma.drama.create({
+        data: {
+          title: 'Test Drama for Voting',
+          details: 'This is a test drama to verify voting functionality',
+          severity: 3,
+          createdAt: new Date(),
+          isFinished: false,
+          participants: {
+            connect: [
+              { id: lowri.id },
+              { id: emma.id },
+              { id: melissa.id },
+            ],
+          },
+        },
       })
     }
 

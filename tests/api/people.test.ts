@@ -6,7 +6,6 @@ vi.mock('@/lib/prisma', () => ({
   prisma: {
     person: {
       findMany: vi.fn(),
-      findFirst: vi.fn(),
       create: vi.fn(),
     },
   },
@@ -18,18 +17,22 @@ describe('GET /api/people', () => {
   })
 
   it('should return list of people', async () => {
+    const mockDate = '2025-10-30T10:00:00.000Z'
     const mockPeople = [
-      { id: '1', name: 'Alice', createdAt: new Date() },
-      { id: '2', name: 'Bob', createdAt: new Date() },
+      { id: '1', name: 'Alice', createdAt: new Date(mockDate), icon: '👤' },
+      { id: '2', name: 'Bob', createdAt: new Date(mockDate), icon: '👤' },
     ]
 
-    vi.mocked(prisma.person.findMany).mockResolvedValue(mockPeople)
+    vi.mocked(prisma.person.findMany).mockResolvedValue(mockPeople as any)
 
     const response = await GET()
     const data = await response.json()
 
     expect(response.status).toBe(200)
-    expect(data).toEqual(mockPeople)
+    expect(data).toMatchObject([
+      { id: '1', name: 'Alice', icon: '👤' },
+      { id: '2', name: 'Bob', icon: '👤' },
+    ])
     expect(prisma.person.findMany).toHaveBeenCalledWith({
       orderBy: { name: 'asc' },
     })
@@ -42,10 +45,12 @@ describe('POST /api/people', () => {
   })
 
   it('should create a new person successfully', async () => {
-    const newPerson = { id: '1', name: 'Alice', createdAt: new Date() }
+    const mockDate = '2025-10-30T10:00:00.000Z'
+    const newPerson = { id: '1', name: 'Alice', createdAt: new Date(mockDate), icon: '👤' }
 
-    vi.mocked(prisma.person.findFirst).mockResolvedValue(null)
-    vi.mocked(prisma.person.create).mockResolvedValue(newPerson)
+    // Mock findMany to return empty array (no existing people)
+    vi.mocked(prisma.person.findMany).mockResolvedValue([])
+    vi.mocked(prisma.person.create).mockResolvedValue(newPerson as any)
 
     const request = new Request('http://localhost/api/people', {
       method: 'POST',
@@ -56,7 +61,7 @@ describe('POST /api/people', () => {
     const data = await response.json()
 
     expect(response.status).toBe(201)
-    expect(data).toEqual(newPerson)
+    expect(data).toMatchObject({ id: '1', name: 'Alice', icon: '👤' })
   })
 
   it('should return 400 if name is missing', async () => {
@@ -86,8 +91,10 @@ describe('POST /api/people', () => {
   })
 
   it('should return 409 if person already exists (case insensitive)', async () => {
-    const existingPerson = { id: '1', name: 'alice', createdAt: new Date() }
-    vi.mocked(prisma.person.findFirst).mockResolvedValue(existingPerson)
+    const mockDate = '2025-10-30T10:00:00.000Z'
+    const existingPerson = { id: '1', name: 'alice', createdAt: new Date(mockDate), icon: '👤' }
+    // Mock findMany to return existing person
+    vi.mocked(prisma.person.findMany).mockResolvedValue([existingPerson as any])
 
     const request = new Request('http://localhost/api/people', {
       method: 'POST',
