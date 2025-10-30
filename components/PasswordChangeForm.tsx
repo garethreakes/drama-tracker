@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface PasswordChangeFormProps {
   personId: string
@@ -10,6 +11,7 @@ interface PasswordChangeFormProps {
 }
 
 export default function PasswordChangeForm({ personId, personName, canChange, onSuccess }: PasswordChangeFormProps) {
+  const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
@@ -53,6 +55,12 @@ export default function PasswordChangeForm({ personId, personName, canChange, on
       const data = await response.json()
 
       if (!response.ok) {
+        // If session is invalid, redirect to login
+        if (response.status === 401) {
+          alert(data.error || 'Your session is invalid. Please log in again.')
+          router.push('/login')
+          return
+        }
         setError(data.error || 'Failed to update password')
         return
       }

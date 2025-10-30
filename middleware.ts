@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 const PUBLIC_PATHS = ['/login']
 const SESSION_COOKIE_NAME = 'drama_tracker_session'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Allow public paths
@@ -19,6 +20,26 @@ export function middleware(request: NextRequest) {
     // Redirect to login
     const loginUrl = new URL('/login', request.url)
     return NextResponse.redirect(loginUrl)
+  }
+
+  // Validate that the user still exists in the database
+  try {
+    const user = await prisma.person.findUnique({
+      where: { id: sessionCookie.value },
+    })
+
+    if (!user) {
+      // Session has invalid user ID - clear cookie and redirect to login
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      response.cookies.delete(SESSION_COOKIE_NAME)
+      return response
+    }
+  } catch (error) {
+    console.error('Error validating session in middleware:', error)
+    // On error, redirect to login to be safe
+    const response = NextResponse.redirect(new URL('/login', request.url))
+    response.cookies.delete(SESSION_COOKIE_NAME)
+    return response
   }
 
   return NextResponse.next()
