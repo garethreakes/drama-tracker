@@ -96,7 +96,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting || !name.trim()}
-              className="w-full gradient-purple-pink text-white font-black py-3 px-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full font-black py-3 px-6 rounded-full shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:shadow-none enabled:bg-gradient-to-r enabled:from-purple-600 enabled:to-pink-600 enabled:text-white enabled:hover:shadow-xl enabled:hover:scale-105"
             >
               {isSubmitting ? '⏳ Logging in...' : '🔐 Login'}
             </button>

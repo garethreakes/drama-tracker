@@ -27,17 +27,16 @@ export default async function ManageFriendsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div className="mb-6">
-        <Link
-          href="/"
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-        >
-          ← Back to Home
-        </Link>
-      </div>
-
       <div>
-        <h1 className="text-4xl font-black text-purple-900 mb-2">👥 Manage Friends 👥</h1>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+          <h1 className="text-4xl font-black text-purple-900">👥 Manage Friends 👥</h1>
+          <Link
+            href="/"
+            className="gradient-purple-pink text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all whitespace-nowrap"
+          >
+            🏠 Back to Home
+          </Link>
+        </div>
         <p className="text-purple-700 font-semibold">Add new friends and view your friend list</p>
       </div>
 
