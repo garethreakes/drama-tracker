@@ -37,8 +37,8 @@ async function globalSetup() {
     for (const name of friendNames) {
       await prisma.person.upsert({
         where: { name },
-        update: { passwordHash: testPassword },
-        create: { name, passwordHash: testPassword },
+        update: { password: testPassword },
+        create: { name, password: testPassword },
       })
     }
 
