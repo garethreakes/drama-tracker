@@ -126,20 +126,24 @@ export default function DramaCard({ drama }: DramaCardProps) {
 
       {/* Action buttons in top right corner */}
       <div className="absolute top-3 right-3 flex gap-1 z-10">
-        {isExpanded && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsExpanded(false)
-            }}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/90 hover:bg-white text-gray-600 hover:text-gray-800 transition-all shadow-md hover:shadow-lg transform hover:scale-110"
-            title="Collapse"
-          >
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsExpanded(!isExpanded)
+          }}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/90 hover:bg-white text-gray-600 hover:text-gray-800 transition-all shadow-md hover:shadow-lg transform hover:scale-110"
+          title={isExpanded ? 'Collapse' : 'Expand'}
+        >
+          {isExpanded ? (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
               <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
             </svg>
-          </button>
-        )}
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+              <path fillRule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
         <button
           onClick={handleToggleFinish}
           disabled={isToggling}
@@ -180,14 +184,10 @@ export default function DramaCard({ drama }: DramaCardProps) {
         </button>
       </div>
 
-      <div className="p-5 pr-32 relative z-0">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full text-left focus:outline-none"
-        >
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-xl font-black text-white drop-shadow-lg">{drama.title}</h3>
+      <div className="p-5 pr-40 relative z-0">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-xl font-black text-white drop-shadow-lg">{drama.title}</h3>
               {isPending ? (
                 <span className="px-3 py-1 text-xs font-black bg-gray-500 text-white rounded-full shadow-lg ring-2 ring-white/50">
                   ⏳ PENDING
@@ -232,14 +232,7 @@ export default function DramaCard({ drama }: DramaCardProps) {
               </div>
             )}
           </div>
-
-          <div className="mt-3 text-sm text-white/90 flex items-center font-bold">
-            <span className="mr-1">
-              {isExpanded ? '👇' : '👉'}
-            </span>
-            <span>{isExpanded ? 'Click to hide' : 'Click for more'}</span>
-          </div>
-        </button>
+        </div>
 
         {/* Voting Section - shown when expanded */}
         {isExpanded && (
