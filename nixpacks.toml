@@ -7,6 +7,7 @@ cmds = ["npm ci"]
 [phases.build]
 cmds = [
   "npm run lint",
+  "npm run test:smoke",
   "npx prisma generate",
   "npx prisma db push --accept-data-loss",
   "npx next build"
